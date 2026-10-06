@@ -1,15 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
 import { products, type Product } from "@/data/products";
 import { Icon } from "@/components/ui/Icon";
 import { Magnetic, RevealLines, Stagger, StaggerItem } from "@/components/motion/primitives";
 import ProductModal from "@/components/media/ProductModal";
+import { useState } from "react";
 
 export default function Products() {
   const [active, setActive] = useState<Product | null>(null);
-  const reduce = useReducedMotion();
 
   return (
     <section className="section showcase" id="products">
@@ -45,13 +44,13 @@ export default function Products() {
               <article className="showcase__item">
                 <div className="showcase__media" data-cursor="VIEW">
                   <div className="showcase__media-mask">
-                    <motion.img
+                    <Image
                       src={p.image}
                       alt={p.imageAlt}
+                      fill
+                      sizes="(min-width: 1081px) 45vw, 94vw"
                       loading="lazy"
                       className="showcase__image"
-                      whileHover={reduce ? undefined : { scale: 1.06 }}
-                      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                     />
                     <div className="showcase__media-overlay" />
                   </div>

@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { Icon } from "@/components/ui/Icon";
 import { Magnetic } from "@/components/motion/primitives";
+import {
+  useEscapeKey,
+  useFocusTrap,
+  useScrollLock,
+} from "@/components/hooks/useDialog";
 import type { Product } from "@/data/products";
 
 export default function ProductModal({
@@ -14,23 +18,10 @@ export default function ProductModal({
   product: Product | null;
   onClose: () => void;
 }) {
-  const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!product) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
-
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [product, onClose]);
+  const active = product !== null;
+  const dialogRef = useFocusTrap<HTMLDivElement>(active);
+  useEscapeKey(active, onClose);
+  useScrollLock(active);
 
   return (
     <AnimatePresence>
@@ -45,18 +36,23 @@ export default function ProductModal({
           onClick={onClose}
         >
           <motion.div
+            ref={dialogRef}
             className="modal__dialog"
             role="dialog"
             aria-modal="true"
-            aria-label={`${product.title} — product details`}
+            aria-labelledby="product-modal-title"
             initial={{ opacity: 0, y: 48, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 32, scale: 0.97 }}
+            exit={{
+              opacity: 0,
+              y: 24,
+              scale: 0.98,
+              transition: { duration: 0.26, ease: [0.22, 1, 0.36, 1] },
+            }}
             transition={{ type: "spring", stiffness: 280, damping: 26 }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              ref={closeRef}
               className="modal__close"
               onClick={onClose}
               aria-label="Close product details"
@@ -69,8 +65,7 @@ export default function ProductModal({
                 src={product.image}
                 alt={product.imageAlt}
                 fill
-                sizes="(min-width: 900px) 44vw, 90vw"
-                priority
+                sizes="(min-width: 1080px) 46vw, 92vw"
               />
               <div className="modal__media-overlay" aria-hidden="true" />
               <span className="modal__category">{product.category}</span>
@@ -80,7 +75,9 @@ export default function ProductModal({
               <span className="modal__index" aria-hidden="true">
                 {product.index}
               </span>
-              <h2 className="modal__title">{product.title}</h2>
+              <h2 className="modal__title" id="product-modal-title">
+                {product.title}
+              </h2>
               <p className="modal__tagline">{product.tagline}</p>
               <p className="modal__desc">{product.details}</p>
 
@@ -99,7 +96,18 @@ export default function ProductModal({
                   <a
                     href="#contact"
                     className="btn btn--primary btn--sm"
-                    onClick={onClose}
+                    onClick={(e) => {
+                      /* Close first, then navigate — anchor scrolling is
+                         unreliable while the body scroll-lock is active. */
+                      e.preventDefault();
+                      onClose();
+                      window.setTimeout(() => {
+                        document
+                          .querySelector("#contact")
+                          ?.scrollIntoView({ behavior: "smooth" });
+                        history.replaceState(null, "", "#contact");
+                      }, 80);
+                    }}
                   >
                     Inquire About This Product
                     <Icon name="arrowUpRight" size={16} />

@@ -86,13 +86,6 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} {site.name} All rights reserved.
           </p>
           <p className="site-footer__tag">{site.tagline}</p>
-          <a
-            className="site-footer__social"
-            href="#"
-            aria-label="IEMC India on LinkedIn"
-          >
-            <Icon name="linkedin" size={18} />
-          </a>
         </div>
 
         <div className="site-footer__wordmark" aria-hidden="true">

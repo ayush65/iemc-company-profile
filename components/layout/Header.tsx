@@ -5,10 +5,19 @@ import { AnimatePresence, motion } from "framer-motion";
 import { navLinks, site } from "@/data/site";
 import { Icon } from "@/components/ui/Icon";
 import { Magnetic } from "@/components/motion/primitives";
+import {
+  useEscapeKey,
+  useFocusTrap,
+  useScrollLock,
+} from "@/components/hooks/useDialog";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const menuRef = useFocusTrap<HTMLDivElement>(open);
+  useEscapeKey(open, () => setOpen(false));
+  useScrollLock(open);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -17,19 +26,25 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+  /* Close the menu, then navigate (so the scroll happens after the lock
+   * is released — anchor scrolling is unreliable while overflow is hidden). */
+  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!open) return; // desktop nav: native anchor behaviour works fine
+    e.preventDefault();
+    setOpen(false);
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches
+      ? "auto"
+      : "smooth";
+    window.setTimeout(() => {
+      document.querySelector(href)?.scrollIntoView({ behavior });
+      history.replaceState(null, "", href);
+    }, 80);
+  };
 
   return (
     <>
-      <header
-        className={`site-header${scrolled ? " is-scrolled" : ""}`}
-        data-header
-      >
+      <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
         <div className="container site-header__inner">
           <a href="#hero" className="brand" aria-label="IEMC India — home">
             <span className="brand__mark" aria-hidden="true">
@@ -45,7 +60,11 @@ export default function Header() {
             <ul className="site-nav__list">
               {navLinks.map((l) => (
                 <li key={l.href}>
-                  <a className="site-nav__link" href={l.href}>
+                  <a
+                    className="site-nav__link"
+                    href={l.href}
+                    onClick={(e) => handleNav(e, l.href)}
+                  >
                     <span>{l.label}</span>
                     <span className="site-nav__underline" aria-hidden="true" />
                   </a>
@@ -56,7 +75,11 @@ export default function Header() {
 
           <div className="site-header__actions">
             <Magnetic strength={0.22}>
-              <a href="#contact" className="btn btn--primary btn--sm">
+              <a
+                href="#contact"
+                className="btn btn--primary btn--sm"
+                onClick={(e) => handleNav(e, "#contact")}
+              >
                 Contact Us
                 <Icon name="arrowRight" size={16} />
               </a>
@@ -80,6 +103,7 @@ export default function Header() {
         {open && (
           <motion.div
             id="mobile-menu"
+            ref={menuRef}
             className="mobile-menu"
             role="dialog"
             aria-modal="true"
@@ -97,7 +121,8 @@ export default function Header() {
                       <motion.a
                         href={l.href}
                         className="mobile-menu__link"
-                        onClick={() => setOpen(false)}
+                        data-autofocus={i === 0 ? "" : undefined}
+                        onClick={(e) => handleNav(e, l.href)}
                         initial={{ opacity: 0, y: 44 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 24 }}
@@ -111,7 +136,11 @@ export default function Header() {
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <span>{l.label}</span>
-                        <Icon name="arrowUpRight" size={26} className="mobile-menu__arrow" />
+                        <Icon
+                          name="arrowUpRight"
+                          size={26}
+                          className="mobile-menu__arrow"
+                        />
                       </motion.a>
                     </li>
                   ))}
@@ -119,7 +148,7 @@ export default function Header() {
                     <motion.a
                       href="#contact"
                       className="mobile-menu__link mobile-menu__link--cta"
-                      onClick={() => setOpen(false)}
+                      onClick={(e) => handleNav(e, "#contact")}
                       initial={{ opacity: 0, y: 44 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 24 }}
@@ -133,7 +162,11 @@ export default function Header() {
                         {String(navLinks.length + 1).padStart(2, "0")}
                       </span>
                       <span>Contact Us</span>
-                      <Icon name="arrowUpRight" size={26} className="mobile-menu__arrow" />
+                      <Icon
+                        name="arrowUpRight"
+                        size={26}
+                        className="mobile-menu__arrow"
+                      />
                     </motion.a>
                   </li>
                 </ul>

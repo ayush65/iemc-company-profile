@@ -64,13 +64,15 @@ export default function Team() {
                   </ul>
                 </div>
                 <footer className="team-card__socials">
-                  <a
-                    href={m.linkedin}
-                    aria-label={`${m.name} on LinkedIn`}
-                    className="team-card__social"
-                  >
-                    <Icon name="linkedin" size={18} />
-                  </a>
+                  {m.linkedin && m.linkedin !== "#" && (
+                    <a
+                      href={m.linkedin}
+                      aria-label={`${m.name} on LinkedIn`}
+                      className="team-card__social"
+                    >
+                      <Icon name="linkedin" size={18} />
+                    </a>
+                  )}
                   <a
                     href="mailto:contact@iemcindia.com"
                     aria-label={`Email ${m.name}`}

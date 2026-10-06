@@ -1,49 +1,93 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { site } from "@/data/site";
 import { Icon } from "@/components/ui/Icon";
 import { FadeIn, Magnetic, RevealLines } from "@/components/motion/primitives";
 
+type Errors = { name?: boolean; phone?: boolean; message?: boolean };
+type Feedback = { type: "success" | "error"; msg: string; mailto?: string } | null;
+
+/** Accepts "98765 43210", "+91 98946 97390", "09894697390" etc. */
+function normalizePhone(raw: string) {
+  let digits = raw.replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) digits = digits.slice(2);
+  if (digits.length === 11 && digits.startsWith("0")) digits = digits.slice(1);
+  return digits;
+}
+
 export default function Contact() {
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; msg: string } | null>(null);
+  const [errors, setErrors] = useState<Errors>({});
+  const [feedback, setFeedback] = useState<Feedback>(null);
   const [sending, setSending] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    []
+  );
+
+  const clearError = (key: keyof Errors) =>
+    setErrors((e) => (e[key] ? { ...e, [key]: false } : e));
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
-    const phone = (form.elements.namedItem("phno") as HTMLInputElement).value.trim();
+    const phoneRaw = (form.elements.namedItem("phno") as HTMLInputElement).value.trim();
     const message = (form.elements.namedItem("message") as HTMLTextAreaElement).value.trim();
 
-    const next: Record<string, boolean> = {
-      name: !name,
-      phone: !/^[6-9]\d{9}$/.test(phone),
-      message: !message,
+    const digits = normalizePhone(phoneRaw);
+    const next: Errors = {
+      name: name.length < 2,
+      phone: !/^[6-9]\d{9}$/.test(digits),
+      message: message.length < 5,
     };
     setErrors(next);
 
-    if (Object.values(next).some(Boolean)) {
+    if (next.name || next.phone || next.message) {
       setFeedback({ type: "error", msg: "Please correct the highlighted fields." });
+      /* Focus the first invalid field after the error classes have rendered */
+      const firstKey = next.name
+        ? "#fullName"
+        : next.phone
+          ? "#phoneNum"
+          : "#message";
+      requestAnimationFrame(() =>
+        form.querySelector<HTMLElement>(firstKey)?.focus()
+      );
       return;
     }
 
     setSending(true);
-    setTimeout(() => {
+    timer.current = setTimeout(() => {
       setSending(false);
+
+      /* No backend on this site — build a fully prefilled email so the
+         inquiry genuinely reaches the office. The success state shows a
+         one-click send action instead of pretending a network call worked. */
+      const subject = `Website inquiry from ${name}`;
+      const body = `${message}\n\n— ${name}\nPhone: ${phoneRaw}`;
+      const mailto = `mailto:${site.email}?subject=${encodeURIComponent(
+        subject
+      )}&body=${encodeURIComponent(body)}`;
+
       setFeedback({
         type: "success",
-        msg: "Thank you — your quotation request has been routed to our Hosur office.",
+        msg: "Your inquiry is ready — send it to our Hosur office:",
+        mailto,
       });
       form.reset();
       setErrors({});
-      setTimeout(() => setFeedback(null), 7000);
-    }, 900);
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => setFeedback(null), 30000);
+    }, 700);
   }
 
-  const groupClass = (key: string) =>
+  const fieldClass = (key: keyof Errors) =>
     `field${errors[key] ? " field--error" : ""}`;
 
   return (
@@ -108,7 +152,7 @@ export default function Contact() {
 
         <FadeIn delay={0.1} className="contact__form-wrap">
           <form className="contact-form" onSubmit={handleSubmit} noValidate>
-            <div className={groupClass("name")}>
+            <div className={fieldClass("name")}>
               <label htmlFor="fullName">Full Name</label>
               <input
                 type="text"
@@ -117,11 +161,16 @@ export default function Contact() {
                 placeholder="Your full name"
                 required
                 autoComplete="name"
+                aria-invalid={errors.name ? true : undefined}
+                aria-describedby={errors.name ? "fullName-error" : undefined}
+                onChange={() => clearError("name")}
               />
-              <span className="field__error">Please enter your full name</span>
+              <span className="field__error" id="fullName-error">
+                Please enter your full name
+              </span>
             </div>
 
-            <div className={groupClass("phone")}>
+            <div className={fieldClass("phone")}>
               <label htmlFor="phoneNum">Phone Number</label>
               <input
                 type="tel"
@@ -131,13 +180,16 @@ export default function Contact() {
                 required
                 autoComplete="tel"
                 inputMode="tel"
+                aria-invalid={errors.phone ? true : undefined}
+                aria-describedby={errors.phone ? "phoneNum-error" : undefined}
+                onChange={() => clearError("phone")}
               />
-              <span className="field__error">
+              <span className="field__error" id="phoneNum-error">
                 Please enter a valid 10-digit phone number
               </span>
             </div>
 
-            <div className={groupClass("message")}>
+            <div className={fieldClass("message")}>
               <label htmlFor="message">Requirement Details</label>
               <textarea
                 id="message"
@@ -145,8 +197,11 @@ export default function Contact() {
                 rows={4}
                 placeholder="Technical specs, quantities, timeline..."
                 required
+                aria-invalid={errors.message ? true : undefined}
+                aria-describedby={errors.message ? "message-error" : undefined}
+                onChange={() => clearError("message")}
               />
-              <span className="field__error">
+              <span className="field__error" id="message-error">
                 Please provide details about your requirement
               </span>
             </div>
@@ -156,7 +211,7 @@ export default function Contact() {
                 {sending ? (
                   <>
                     <span className="btn__spinner" aria-hidden="true" />
-                    Sending...
+                    Preparing...
                   </>
                 ) : (
                   <>
@@ -169,7 +224,7 @@ export default function Contact() {
 
             <AnimatePresence>
               {feedback && (
-                <motion.p
+                <motion.div
                   className={`contact-form__feedback ${feedback.type}`}
                   role={feedback.type === "error" ? "alert" : "status"}
                   initial={{ opacity: 0, y: 10 }}
@@ -181,8 +236,18 @@ export default function Contact() {
                     name={feedback.type === "success" ? "check" : "close"}
                     size={16}
                   />
-                  {feedback.msg}
-                </motion.p>
+                  <span>
+                    {feedback.msg}
+                    {feedback.mailto && (
+                      <>
+                        {" "}
+                        <a href={feedback.mailto} className="contact-form__send">
+                          Send via email <Icon name="arrowUpRight" size={13} />
+                        </a>
+                      </>
+                    )}
+                  </span>
+                </motion.div>
               )}
             </AnimatePresence>
           </form>

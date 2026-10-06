@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
+import { MotionConfig } from "framer-motion";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -25,6 +26,8 @@ export const metadata: Metadata = {
   title: `${site.name} | Industrial & Technology Solutions`,
   description: site.description,
   metadataBase: new URL("https://iemcindia.com"),
+  colorScheme: "light",
+  themeColor: "#ffffff",
   openGraph: {
     title: `${site.name} | Industrial & Technology Solutions`,
     description: site.description,
@@ -36,14 +39,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${plusJakarta.variable}`}>
       <body>
-        <a className="skip-link" href="#main">
-          Skip to content
-        </a>
-        <ScrollProgress />
-        <CustomCursor />
-        <Header />
-        <main id="main">{children}</main>
-        <Footer />
+        <MotionConfig reducedMotion="user">
+          <a className="skip-link" href="#main">
+            Skip to content
+          </a>
+          <ScrollProgress />
+          <CustomCursor />
+          <Header />
+          <main id="main">{children}</main>
+          <Footer />
+        </MotionConfig>
       </body>
     </html>
   );
