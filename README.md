@@ -1,12 +1,13 @@
 # IEMC India Pvt. Ltd. — Company Profile
 
-Premium, immersive company website for IEMC India Pvt. Ltd. — industrial & technology solutions, Hosur, Tamil Nadu.
+Premium single-page company website for IEMC India Pvt. Ltd. — industrial & technology solutions, Hosur, Tamil Nadu.
 
-**Stack:** Next.js 15 (App Router) · React 19 · TypeScript · Framer Motion
+**Stack:** Next.js 15 (App Router) · React 19 · TypeScript · Framer Motion · clean white/light design system
 
 ## Highlights
 
-- Cinematic hero with masked line-by-line text reveals, parallax media, and animated counters
+- Clean light design: white surfaces, brand-navy text, electric-blue accents
+- Hero with masked line-by-line text reveals, parallax media, and animated counters
 - Custom animation primitives (`FadeIn`, `Stagger`, `RevealLines`, `Parallax`, `Counter`, `Magnetic`)
 - Alternating product showcase with accessible detail modal (Escape / click-outside / scroll-lock)
 - Full-screen animated mobile navigation, scroll progress bar, desktop custom cursor
@@ -30,6 +31,8 @@ vercel --prod
 
 ## Structure
 
+Single route (`/`) composed of sections — no unnecessary pages.
+
 ```
 app/            # App shell, design system CSS, page composition
 components/
@@ -37,8 +40,8 @@ components/
   sections/     # Hero, About, Industries, Products, VisionMission, Team, CTA, Contact
   media/        # ProductModal
   motion/       # Reusable Framer Motion primitives
+  hooks/        # Shared dialog hooks (scroll-lock, Escape, focus-trap)
   ui/           # Icon, Marquee
   fx/           # CustomCursor, ScrollProgress
 data/           # Site + product content (content separated from presentation)
-legacy/         # Original static site (archived)
 ```

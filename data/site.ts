@@ -44,5 +44,3 @@ export const marqueeItems = [
   "Clean-Room Fabrication",
   "Smart Sensors",
 ];
-
-export const certifications = ["ISO 9001:2015", "ISO 14001", "ASME", "CE Compliant"];

@@ -1,36 +1,23 @@
 type IconName =
-  | "industry"
-  | "gears"
-  | "globe"
   | "chip"
-  | "droplet"
-  | "gauge"
-  | "network"
-  | "shield"
   | "compass"
   | "target"
   | "check"
   | "arrowRight"
   | "arrowUpRight"
-  | "chevronLeft"
-  | "chevronRight"
   | "close"
-  | "menu"
   | "location"
   | "mail"
   | "phone"
   | "linkedin"
   | "send"
   | "zap"
-  | "plus";
+  | "shield"
+  | "gears"
+  | "globe";
 
 const paths: Record<IconName, React.ReactNode> = {
-  industry: (
-    <>
-      <path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
-      <path d="M17 18h1M12 18h1M7 18h1" />
-    </>
-  ),
+  shield: <path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z" />,
   gears: (
     <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7.5-3a7.5 7.5 0 0 1-.14 1.37l2.06 1.6a1 1 0 0 1 .12 1.58l-2 3.46a1 1 0 0 1-1.36.36l-2.2-1.1a7.6 7.6 0 0 1-2.35 1.36l-.34 2.4a1 1 0 0 1-1 1H6.4a1 1 0 0 1-1-1l-.34-2.4a7.6 7.6 0 0 1-2.35-1.36l-2.2 1.1a1 1 0 0 1-1.36-.36l-2-3.46a1 1 0 0 1 .12-1.58l2.06-1.6A7.5 7.5 0 0 1 4.5 12a7.5 7.5 0 0 1-.14-1.37l-2.06-1.6a1 1 0 0 1-.12-1.58l2-3.46a1 1 0 0 1 1.36-.36l2.2 1.1a7.6 7.6 0 0 1 2.35-1.36l.34-2.4a1 1 0 0 1 1-1h3.2a1 1 0 0 1 1 1l.34 2.4a7.6 7.6 0 0 1 2.35 1.36l2.2-1.1a1 1 0 0 1 1.36.36l2 3.46a1 1 0 0 1-.12 1.58l-2.06 1.6c.09.45.14.92.14 1.37Z" />
   ),
@@ -46,22 +33,6 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M10 2v3M14 2v3M10 19v3M14 19v3M2 10h3M2 14h3M19 10h3M19 14h3" />
     </>
   ),
-  droplet: <path d="M12 3s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11Z" />,
-  gauge: (
-    <>
-      <path d="M12 15l4-6" />
-      <path d="M3.5 15a9 9 0 1 1 17 0" />
-    </>
-  ),
-  network: (
-    <>
-      <circle cx="5" cy="6" r="2.5" />
-      <circle cx="19" cy="6" r="2.5" />
-      <circle cx="12" cy="18" r="2.5" />
-      <path d="M7.3 7.3l3.4 8.2M16.7 7.3l-3.4 8.2M7.5 6h9" />
-    </>
-  ),
-  shield: <path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z" />,
   compass: (
     <>
       <circle cx="12" cy="12" r="9" />
@@ -78,10 +49,7 @@ const paths: Record<IconName, React.ReactNode> = {
   check: <path d="M4.5 12.5l5 5 10-11" />,
   arrowRight: <path d="M4 12h15M13 5.5L19.5 12 13 18.5" />,
   arrowUpRight: <path d="M6 18L18 6M8 6h10v10" />,
-  chevronLeft: <path d="M14.5 5.5L8 12l6.5 6.5" />,
-  chevronRight: <path d="M9.5 5.5L16 12l-6.5 6.5" />,
   close: <path d="M5 5l14 14M19 5L5 19" />,
-  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   location: (
     <>
       <path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" />
@@ -111,7 +79,6 @@ const paths: Record<IconName, React.ReactNode> = {
     </>
   ),
   zap: <path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12L13 2Z" />,
-  plus: <path d="M12 5v14M5 12h14" />,
 };
 
 export function Icon({

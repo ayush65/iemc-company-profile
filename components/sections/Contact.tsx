@@ -50,15 +50,16 @@ export default function Contact() {
 
     if (next.name || next.phone || next.message) {
       setFeedback({ type: "error", msg: "Please correct the highlighted fields." });
-      /* Focus the first invalid field after the error classes have rendered */
+      /* Focus the first invalid field. Error text renders below the input and
+         the feedback banner below the fields, so the field's own position
+         never shifts — focus can happen synchronously (works even when
+         requestAnimationFrame is throttled in background tabs). */
       const firstKey = next.name
         ? "#fullName"
         : next.phone
           ? "#phoneNum"
           : "#message";
-      requestAnimationFrame(() =>
-        form.querySelector<HTMLElement>(firstKey)?.focus()
-      );
+      form.querySelector<HTMLElement>(firstKey)?.focus();
       return;
     }
 
